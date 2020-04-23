@@ -12,7 +12,7 @@ func openDB() *sql.DB {
 	fmt.Println("opendb: ")
 	db, err := sql.Open(
 		"mysql",
-		"notisync:fhc970517@/notisync?charset=utf8")
+		"username:password@/db_name?charset=utf8")
 	checkErr(err)
 	return db
 }
