@@ -1,5 +1,5 @@
 # NotiSync-Server
-a simple implement for the app called [Notisyc](https://github.com/SquareFong/Notisync)
+a simple implement for the app called [Notisync](https://github.com/SquareFong/Notisync)
 
 this program relies on [this](https://github.com/go-sql-driver/mysql). Please install it before use.
 
