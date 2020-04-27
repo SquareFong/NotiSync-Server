@@ -2,19 +2,60 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var dataSourceName string
+
 func openDB() *sql.DB {
-	fmt.Println("opendb: ")
 	db, err := sql.Open(
 		"mysql",
-		"username:password@/db_name?charset=utf8")
+		dataSourceName)
 	checkErr(err)
 	return db
+}
+
+func readDBConfig(fileName string) string {
+	fl, err := os.Open(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	defer fl.Close()
+	//读文件
+	var str string
+	buf := make([]byte, 1024)
+	for {
+		n, _ := fl.Read(buf)
+		if 0 == n {
+			break
+		}
+		str += string(buf)
+	}
+	str = strings.Replace(str, "\x00", "", -1)
+	//转Json
+	type database struct {
+		UserName string
+		Password string
+		DBName   string
+	}
+	var dbCfg database
+	err0 := json.Unmarshal([]byte(str), &dbCfg)
+	if err0 != nil {
+		fmt.Println("notificationParser:strToNotification:\n json ERROR", err0)
+	} else {
+		println(dbCfg.UserName + " " + dbCfg.Password + " " + dbCfg.DBName)
+	}
+	r := fmt.Sprintf("%s:%s@/%s?charset=utf8", dbCfg.UserName, dbCfg.Password, dbCfg.DBName)
+	println("readDBConfig: " + r)
+	dataSourceName = r
+	return r
 }
 
 func createUsersTable() {
@@ -25,18 +66,18 @@ func createUsersTable() {
 	smt.Exec()
 }
 
-func createNotiTable(id int)  {
+func createNotiTable(id int) {
 	db := openDB()
-	s := "create table if not exists " + "table"+ string(id) +
+	s := "create table if not exists " + "table" + string(id) +
 		" (time INTEGER, PackageName TEXT, Title TEXT, Content TEXT)"
 	smt, err := db.Prepare(s)
 	checkErr(err)
 	smt.Exec()
 }
 
-func addUser(uuid string)  {
+func addUser(uuid string) {
 	db := openDB()
-	s := fmt.Sprintf("insert Users(uuid) values('%s')", uuid);
+	s := fmt.Sprintf("insert Users(uuid) values('%s')", uuid)
 	smt, err := db.Prepare(s)
 	checkErr(err)
 	smt.Exec()
@@ -56,7 +97,7 @@ func getUserCounts() int {
 }
 
 // 加入一个通知, 按照uuid
-func insertNotificationByUUID(UUID string, data notificationData)  {
+func insertNotificationByUUID(UUID string, data notificationData) {
 	db := openDB()
 	tableName := getTableName(UUID)
 	var Time int
@@ -69,7 +110,6 @@ func insertNotificationByUUID(UUID string, data notificationData)  {
 	checkErr(err)
 	smt.Exec()
 }
-
 
 // 获取通知
 func getNotification(UUID string, lastUpdate string) []notificationData {
@@ -98,7 +138,7 @@ func getTableName(uuid string) string {
 	for rows.Next() {
 		var id int
 		rows.Scan(&id)
-		str = "table"+strconv.Itoa(id)
+		str = "table" + strconv.Itoa(id)
 	}
 	return str
 }

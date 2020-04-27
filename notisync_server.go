@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -73,7 +74,15 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 }
 
 func main() {
-	configFile := "/etc/notisync/config.json"
+	cfgFilePtr := flag.String("c", "", "configure file position")
+
+	flag.Parse()
+
+	if len(*cfgFilePtr) == 0 {
+		*cfgFilePtr = "/etc/notisync/config.json"
+	}
+
+	readDBConfig(*cfgFilePtr)
 
 	createUsersTable()
 
