@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func parse(writer http.ResponseWriter, request *http.Request){
-	request.ParseForm() //解析url传递的参数，对于POST则解析响应包的主体（request body）
+func parse(writer http.ResponseWriter, request *http.Request) {
+	request.ParseForm()                 //解析url传递的参数，对于POST则解析响应包的主体（request body）
 	fmt.Println("Form: ", request.Form) //这些信息是输出到服务器端的打印信息
 	fmt.Println("Method: ", request.Method)
 	fmt.Println("Path: ", request.URL.Path)
@@ -39,7 +39,7 @@ func parse(writer http.ResponseWriter, request *http.Request){
 			for _, n := range noti.Data {
 				insertNotificationByUUID(noti.UUID, n)
 			}
-		}else {
+		} else {
 			fmt.Println("No notification received!")
 		}
 		fmt.Fprintf(writer, "200")
@@ -56,7 +56,7 @@ func parse(writer http.ResponseWriter, request *http.Request){
 		lastUpdate := request.Form.Get("Time")
 		if len(uuid) == 0 {
 			fmt.Println("UUID is Null")
-		}else if len(lastUpdate) == 0 {
+		} else if len(lastUpdate) == 0 {
 			fmt.Println("Time is Null")
 		} else {
 			noti := getNotification(uuid, lastUpdate)
@@ -73,9 +73,11 @@ func parse(writer http.ResponseWriter, request *http.Request){
 }
 
 func main() {
+	configFile := "/etc/notisync/config.json"
+
 	createUsersTable()
 
-	http.HandleFunc("/", parse) //设置访问的路由
+	http.HandleFunc("/", parse)              //设置访问的路由
 	err := http.ListenAndServe(":9000", nil) //设置监听的端口
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
