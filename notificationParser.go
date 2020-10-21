@@ -43,3 +43,48 @@ func notificationsToStr(noti []notification) string {
 	}
 	return string(str)
 }
+
+type phoneDetail struct {
+	OsVersion    string
+	Model        string
+	Kernel       string
+	Uptime       string
+	Processor    string
+	MemoryUsage  string
+	StorageUsage string
+}
+
+func strToPhoneDetail(str string) phoneDetail {
+	var item phoneDetail
+	err := json.Unmarshal([]byte(str), &item)
+	if err != nil {
+		fmt.Println("notificationParser:strToNotification:\n json ERROR", err)
+	}
+	return item
+}
+
+type message struct {
+	Number string
+	Name   string
+	Body   string
+	Date   string
+	Type   string
+}
+
+func strToMessage(str string) message {
+	var item message
+	err := json.Unmarshal([]byte(str), &item)
+	if err != nil {
+		fmt.Println("notificationParser:strToNotification:\n json ERROR", err)
+	}
+	return item
+}
+
+func strToAllMessages(str string) []message {
+	var items []message
+	err := json.Unmarshal([]byte(str), &items)
+	if err != nil {
+		fmt.Println("notificationParser:strToNotification:\n json ERROR", err)
+	}
+	return items
+}

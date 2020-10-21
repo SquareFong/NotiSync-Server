@@ -41,19 +41,52 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			if len(noti.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
 				n := strToNotification(string(decodeByte))
-				insertNotificationByUUID(noti.UUID, n)
+
+				fmt.Println(n)
+				//TODO 入数据库
+				//insertNotificationByUUID(noti.UUID, n)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
 		} else if noti.Type == "Detail" {
 			//TODO detail/message/allmessages json 解码器
+			if len(noti.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+				detail := strToPhoneDetail(string(decodeByte))
+				fmt.Println(detail)
+				//TODO 写入管理器
+			} else {
+				fmt.Println("No communicateStruct received!")
+			}
 			//TODO 全局变量记录状态
 		} else if noti.Type == "Message" {
+			if len(noti.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+				detail := strToMessage(string(decodeByte))
+				fmt.Println(detail)
+				//TODO 写入管理器
+			} else {
+				fmt.Println("No communicateStruct received!")
+			}
 
 		} else if noti.Type == "AllMessages" {
-
+			if len(noti.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+				detail := strToAllMessages(string(decodeByte))
+				fmt.Println(detail)
+				//TODO 写入管理器
+			} else {
+				fmt.Println("No communicateStruct received!")
+			}
 		} else if noti.Type == "newSMS" {
-
+			if len(noti.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+				detail := strToMessage(string(decodeByte))
+				fmt.Println(detail)
+				//TODO 写入管理器
+			} else {
+				fmt.Println("No communicateStruct received!")
+			}
 		} else {
 
 		}
