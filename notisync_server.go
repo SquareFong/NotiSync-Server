@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,10 +13,10 @@ import (
 )
 
 func parse(writer http.ResponseWriter, request *http.Request) {
-	request.ParseForm()                 //解析url传递的参数，对于POST则解析响应包的主体（request body）
-	fmt.Println("Form: ", request.Form) //这些信息是输出到服务器端的打印信息
-	fmt.Println("Method: ", request.Method)
+	request.ParseForm()                     //解析url传递的参数，对于POST则解析响应包的主体（request body）
+	fmt.Println("Method: ", request.Method) //这些信息是输出到服务器端的打印信息
 	fmt.Println("Path: ", request.URL.Path)
+	fmt.Println("Form: ", request.Form)
 	if request.Method == "POST" {
 		if request.URL.Path != "/send" {
 			fmt.Println("Path and Method did not match")
@@ -28,7 +29,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 		}
 		str := bytes.NewBuffer(result).String()
 		fmt.Println(str)
-		var noti notification
+		var noti communicateStruct
 		err0 := json.Unmarshal([]byte(str), &noti)
 		if err0 != nil {
 			fmt.Println("notificationParser:strToNotification:\n json ERROR", err0)
@@ -36,36 +37,65 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 		//测试用打印
 		fmt.Println(noti)
 
-		if len(noti.Data) != 0 {
-			for _, n := range noti.Data {
+		if noti.Type == "Notification" {
+			if len(noti.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+				n := strToNotification(string(decodeByte))
 				insertNotificationByUUID(noti.UUID, n)
+			} else {
+				fmt.Println("No communicateStruct received!")
 			}
+		} else if noti.Type == "Detail" {
+			//TODO detail/message/allmessages json 解码器
+			//TODO 全局变量记录状态
+		} else if noti.Type == "Message" {
+
+		} else if noti.Type == "AllMessages" {
+
+		} else if noti.Type == "newSMS" {
+
 		} else {
-			fmt.Println("No notification received!")
+
 		}
+
 		fmt.Fprintf(writer, "200")
 	} else if request.Method == "GET" {
 		if request.URL.Path != "/get" {
 			fmt.Println("Path and Method did not match")
 			return
 		}
+
 		for k, v := range request.Form {
 			fmt.Println("key", k)
 			fmt.Println("val: ", strings.Join(v, ""))
 		}
 		uuid := request.Form.Get("UUID")
 		lastUpdate := request.Form.Get("Time")
+		cmdType := request.Form.Get("Type")
 		if len(uuid) == 0 {
 			fmt.Println("UUID is Null")
 		} else if len(lastUpdate) == 0 {
 			fmt.Println("Time is Null")
 		} else {
-			noti := getNotification(uuid, lastUpdate)
-			str := notificationsToStr(noti)
-			fmt.Println(str)
-			n, err := fmt.Fprintf(writer, str)
-			fmt.Println(n)
-			fmt.Println(err)
+			if cmdType == "Notification" {
+				noti := getNotification(uuid, lastUpdate)
+				str := notificationsToStr(noti)
+				fmt.Println(str)
+				n, err := fmt.Fprintf(writer, str)
+				fmt.Println(n)
+				fmt.Println(err)
+			} else if cmdType == "Detail" {
+				//TODO
+			} else if cmdType == "Message" {
+
+			} else if cmdType == "Command" {
+
+			} else {
+				var str string
+				n, err := fmt.Fprintf(writer, str)
+				fmt.Println(n)
+				fmt.Println(err)
+			}
 		}
 	} else {
 		println("Got Other Methods")

@@ -5,17 +5,18 @@ import (
 	"fmt"
 )
 
-type notification struct {
+type communicateStruct struct {
 	UUID string
 	Time string
-	Data []notificationData
+	Type string
+	Data string //base64
 }
 
-type notificationData struct {
-	Time string
+type notification struct {
+	Time        string
 	PackageName string
-	Title string
-	Content string
+	Title       string
+	Content     string
 }
 
 func strToNotification(str string) notification {
@@ -27,7 +28,7 @@ func strToNotification(str string) notification {
 	return n
 }
 
-func notificationToStr(noti notification) string  {
+func notificationToStr(noti communicateStruct) string {
 	str, err0 := json.Marshal(noti)
 	if err0 != nil {
 		fmt.Println("notificationParser:notificationToStr:\n json err:", err0)
@@ -35,7 +36,7 @@ func notificationToStr(noti notification) string  {
 	return string(str)
 }
 
-func notificationsToStr(noti []notificationData) string  {
+func notificationsToStr(noti []notification) string {
 	str, err0 := json.Marshal(noti)
 	if err0 != nil {
 		fmt.Println("notificationParser:notificationToStr:\n json err:", err0)

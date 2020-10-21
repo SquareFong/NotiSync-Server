@@ -97,7 +97,7 @@ func getUserCounts() int {
 }
 
 // 加入一个通知, 按照uuid
-func insertNotificationByUUID(UUID string, data notificationData) {
+func insertNotificationByUUID(UUID string, data notification) {
 	db := openDB()
 	tableName := getTableName(UUID)
 	var Time int
@@ -112,16 +112,16 @@ func insertNotificationByUUID(UUID string, data notificationData) {
 }
 
 // 获取通知
-func getNotification(UUID string, lastUpdate string) []notificationData {
+func getNotification(UUID string, lastUpdate string) []notification {
 	db := openDB()
 	tableName := getTableName(UUID)
 	s := fmt.Sprintf("select * from %s where time > %s", tableName, lastUpdate)
 	rows, err := db.Query(s)
 	checkErr(err)
 	defer rows.Close()
-	var datas []notificationData
+	var datas []notification
 	for rows.Next() {
-		var data notificationData
+		var data notification
 		rows.Scan(&data.Time, &data.PackageName, &data.Title, &data.Content)
 		datas = append(datas, data)
 	}
