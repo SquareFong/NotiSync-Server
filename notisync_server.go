@@ -29,29 +29,29 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 		}
 		str := bytes.NewBuffer(result).String()
 		fmt.Println(str)
-		var noti communicateStruct
-		err0 := json.Unmarshal([]byte(str), &noti)
+		var commStruct communicateStruct
+		err0 := json.Unmarshal([]byte(str), &commStruct)
 		if err0 != nil {
 			fmt.Println("notificationParser:strToNotification:\n json ERROR", err0)
 		}
 		//测试用打印
-		fmt.Println(noti)
+		fmt.Println(commStruct)
 
-		if noti.Type == "Notification" {
-			if len(noti.Data) != 0 {
-				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+		if commStruct.Type == "Notification" {
+			if len(commStruct.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				n := strToNotification(string(decodeByte))
 
 				fmt.Println(n)
 				//TODO 入数据库
-				//insertNotificationByUUID(noti.UUID, n)
+				//insertNotificationByUUID(commStruct.UUID, n)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
-		} else if noti.Type == "Detail" {
+		} else if commStruct.Type == "Detail" {
 			//TODO detail/message/allmessages json 解码器
-			if len(noti.Data) != 0 {
-				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+			if len(commStruct.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToPhoneDetail(string(decodeByte))
 				fmt.Println(detail)
 				//TODO 写入管理器
@@ -59,9 +59,9 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				fmt.Println("No communicateStruct received!")
 			}
 			//TODO 全局变量记录状态
-		} else if noti.Type == "Message" {
-			if len(noti.Data) != 0 {
-				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+		} else if commStruct.Type == "Message" {
+			if len(commStruct.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToMessage(string(decodeByte))
 				fmt.Println(detail)
 				//TODO 写入管理器
@@ -69,18 +69,18 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				fmt.Println("No communicateStruct received!")
 			}
 
-		} else if noti.Type == "AllMessages" {
-			if len(noti.Data) != 0 {
-				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+		} else if commStruct.Type == "AllMessages" {
+			if len(commStruct.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToAllMessages(string(decodeByte))
 				fmt.Println(detail)
 				//TODO 写入管理器
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
-		} else if noti.Type == "newSMS" {
-			if len(noti.Data) != 0 {
-				decodeByte, _ := base64.StdEncoding.DecodeString(noti.Data)
+		} else if commStruct.Type == "newSMS" {
+			if len(commStruct.Data) != 0 {
+				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToMessage(string(decodeByte))
 				fmt.Println(detail)
 				//TODO 写入管理器
@@ -93,6 +93,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 
 		fmt.Fprintf(writer, "200")
 	} else if request.Method == "GET" {
+		//Get request
 		if request.URL.Path != "/get" {
 			fmt.Println("Path and Method did not match")
 			return
