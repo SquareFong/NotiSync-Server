@@ -119,8 +119,13 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				fmt.Println(err)
 			} else if cmdType == "Detail" {
 				//TODO
+				detail := getDetail(uuid)
+				str := detailToStr(*detail)
+				_, _ = fmt.Fprintf(writer, str)
 			} else if cmdType == "Message" {
-
+				msm := getMessages(uuid)
+				str := allMessagesToStr(*msm)
+				_, _ = fmt.Fprintf(writer, str)
 			} else if cmdType == "Command" {
 
 			} else {
