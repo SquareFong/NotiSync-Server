@@ -15,9 +15,9 @@ type client struct {
 var allClients = []client{}
 
 func findClientByUUID(UUID string, c **client) bool {
-	for _, value := range allClients {
-		if value.UUID == UUID {
-			*c = &value
+	for i, _ := range allClients {
+		if allClients[i].UUID == UUID {
+			*c = &allClients[i]
 			return true
 		}
 	}
@@ -25,11 +25,11 @@ func findClientByUUID(UUID string, c **client) bool {
 }
 
 func activateClient(UUID string) {
-	var c *client
+	var c *client = nil
 	if findClientByUUID(UUID, &c) {
 		c.lastActiveTime = time.Now().Unix()
 	} else {
-		*c = client{
+		var tmp = client{
 			effective:      true,
 			detail:         phoneDetail{},
 			messages:       []message{},
@@ -37,6 +37,7 @@ func activateClient(UUID string) {
 			lastActiveTime: 0,
 			UUID:           UUID,
 			newSMS:         []message{}}
+		c = &tmp
 		allClients = append(allClients, *c)
 	}
 }
