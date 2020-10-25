@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func parse(writer http.ResponseWriter, request *http.Request) {
@@ -113,22 +115,53 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 		} else {
 			if cmdType == "Notification" {
 				noti := getNotification(uuid, lastUpdate)
-				str := notificationsToStr(noti)
-				fmt.Println(str)
-				n, err := fmt.Fprintf(writer, str)
-				fmt.Println(n)
-				fmt.Println(err)
+				data := notificationsToStr(noti)
+				fmt.Println(data)
+				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 25),
+					"Notification", data)
+				fmt.Println(comStructStr)
+				_, err := fmt.Fprintf(writer, comStructStr)
+				if err != nil {
+					fmt.Println(err)
+				}
 			} else if cmdType == "Detail" {
 				//TODO
 				detail := getDetail(uuid)
-				str := detailToStr(*detail)
-				_, _ = fmt.Fprintf(writer, str)
+				data := detailToStr(*detail)
+				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 25),
+					"Detail", data)
+				_, _ = fmt.Fprintf(writer, comStructStr)
 			} else if cmdType == "Message" {
 				msm := getMessages(uuid)
-				str := allMessagesToStr(*msm)
-				_, _ = fmt.Fprintf(writer, str)
+				data := allMessagesToStr(*msm)
+				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 25),
+					"Notification", data)
+				_, _ = fmt.Fprintf(writer, comStructStr)
 			} else if cmdType == "Command" {
-
+				var c *client
+				var t string
+				var data = ""
+				if findClientByUUID(uuid, &c) {
+					if len(c.newSMS) != 0 {
+						data = allMessagesToStr(*getNewMessages(uuid))
+						c.newSMS = nil
+					} else if c.needAll {
+						t = "all"
+					} else if time.Now().Unix()-c.lastActiveTime > 100 {
+						//TODO 删结构体
+						t = "dead"
+					} else {
+						t = "active"
+					}
+				} else {
+					t = "dead"
+				}
+				if data != "" {
+					data = base64.StdEncoding.EncodeToString([]byte(data))
+				}
+				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 25),
+					t, data)
+				_, _ = fmt.Fprintf(writer, comStructStr)
 			} else {
 				var str string
 				n, err := fmt.Fprintf(writer, str)
