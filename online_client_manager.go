@@ -72,3 +72,42 @@ func getNewMessages(UUID string) *[]message {
 	}
 	return nil
 }
+
+func setDetail(uuid string, detail phoneDetail) bool {
+	var c *client
+	if findClientByUUID(uuid, &c) {
+		c.detail = detail
+		return true
+	}
+	return false
+}
+
+func setMessage(uuid string, msg message) bool {
+	var c *client
+	if findClientByUUID(uuid, &c) {
+		c.messages = append(c.messages, msg)
+		return true
+	}
+	return false
+}
+
+func setAllMessage(uuid string, msg []message) bool {
+	var c *client
+	if findClientByUUID(uuid, &c) {
+		if c.needAll {
+			c.messages = msg
+			c.needAll = false
+			return true
+		}
+	}
+	return false
+}
+
+func setNewSMS(uuid string, msg message) bool {
+	var c *client
+	if findClientByUUID(uuid, &c) {
+		c.newSMS = append(c.newSMS, msg)
+		return true
+	}
+	return false
+}
