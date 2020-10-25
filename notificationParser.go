@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 )
@@ -24,7 +25,7 @@ func strToNotification(str string) notification {
 func notificationsToStr(noti []notification) string {
 	str, err0 := json.Marshal(noti)
 	if err0 != nil {
-		fmt.Println("notificationParser:notificationToStr:\n json err:", err0)
+		fmt.Println("notificationParser:notificationsToStr:\n json err:", err0)
 	}
 	return string(str)
 }
@@ -36,10 +37,26 @@ type communicateStruct struct {
 	Data string //base64
 }
 
-func notificationToStr(noti communicateStruct) string {
-	str, err0 := json.Marshal(noti)
+//Data is raw, not base64
+func packageToCommStr(UUID string, Time string, Type string, Data string) string {
+	com := communicateStruct{
+		UUID: UUID,
+		Time: Time,
+		Type: Type,
+		Data: base64.StdEncoding.EncodeToString([]byte(Data))}
+
+	str, err0 := json.Marshal(com)
 	if err0 != nil {
-		fmt.Println("notificationParser:notificationToStr:\n json err:", err0)
+		fmt.Println("notificationParser: communicateStructToStr:\n json err:", err0)
+	}
+	return string(str)
+
+}
+
+func communicateStructToStr(n communicateStruct) string {
+	str, err0 := json.Marshal(n)
+	if err0 != nil {
+		fmt.Println("notificationParser: communicateStructToStr:\n json err:", err0)
 	}
 	return string(str)
 }
