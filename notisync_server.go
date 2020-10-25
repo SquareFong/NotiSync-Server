@@ -45,28 +45,26 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				n := strToNotification(string(decodeByte))
 
 				fmt.Println(n)
-				//TODO 入数据库
-				//insertNotificationByUUID(commStruct.UUID, n)
+				//入数据库
+				insertNotificationByUUID(commStruct.UUID, n)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
 		} else if commStruct.Type == "Detail" {
-			//TODO detail/message/allmessages json 解码器
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToPhoneDetail(string(decodeByte))
 				fmt.Println(detail)
-				//TODO 写入管理器
+				setDetail(commStruct.UUID, detail)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
-			//TODO 全局变量记录状态
 		} else if commStruct.Type == "Message" {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
-				detail := strToMessage(string(decodeByte))
-				fmt.Println(detail)
-				//TODO 写入管理器
+				msg := strToMessage(string(decodeByte))
+				fmt.Println(msg)
+				setMessage(commStruct.UUID, msg)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
@@ -74,18 +72,18 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 		} else if commStruct.Type == "AllMessages" {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
-				detail := strToAllMessages(string(decodeByte))
-				fmt.Println(detail)
-				//TODO 写入管理器
+				msg := strToAllMessages(string(decodeByte))
+				fmt.Println(msg)
+				setAllMessage(commStruct.UUID, msg)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
 		} else if commStruct.Type == "newSMS" {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
-				detail := strToMessage(string(decodeByte))
-				fmt.Println(detail)
-				//TODO 写入管理器
+				msg := strToMessage(string(decodeByte))
+				fmt.Println(msg)
+				setNewSMS(commStruct.UUID, msg)
 			} else {
 				fmt.Println("No communicateStruct received!")
 			}
