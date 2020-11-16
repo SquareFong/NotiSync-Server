@@ -83,10 +83,12 @@ func setDetail(uuid string, detail phoneDetail) bool {
 	return false
 }
 
-func setMessage(uuid string, msg message) bool {
+func setMessages(uuid string, msg []message) bool {
 	var c *client
 	if findClientByUUID(uuid, &c) {
-		c.messages = append(c.messages, msg)
+		for _,m := range msg {
+			c.messages = append(c.messages, m)
+		}
 		return true
 	}
 	return false

@@ -13,11 +13,12 @@ type notification struct {
 	Content     string
 }
 
-func strToNotification(str string) notification {
-	var n notification
+func strToNotification(str string) []notification {
+	var n []notification
 	err := json.Unmarshal([]byte(str), &n)
 	if err != nil {
 		fmt.Println("notificationParser:strToNotification:\n json ERROR", err)
+		return nil
 	}
 	return n
 }
@@ -97,16 +98,16 @@ func strToMessage(str string) message {
 	return item
 }
 
-func strToAllMessages(str string) []message {
+func strToMessages(str string) []message {
 	var items []message
 	err := json.Unmarshal([]byte(str), &items)
 	if err != nil {
-		fmt.Println("notificationParser.go: strToAllMessages:\n json ERROR", err)
+		fmt.Println("notificationParser.go: strToMessages:\n json ERROR", err)
 	}
 	return items
 }
 
-func allMessagesToStr(messages []message) string {
+func messagesToStr(messages []message) string {
 	str, err0 := json.Marshal(messages)
 	if err0 != nil {
 		fmt.Println("notificationParser.go: AllMessagesToStr:\n json err:", err0)
