@@ -155,6 +155,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 						c.newSMS = nil
 					} else if c.needAll {
 						t = "all"
+						c.needAll = false
 					} else if time.Now().Unix()-c.lastActiveTime > 100 {
 						//TODO 删结构体
 						t = "dead"

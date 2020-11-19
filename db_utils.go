@@ -109,6 +109,7 @@ func insertNotificationByUUID(UUID string, data notification) {
 	smt, err := db.Prepare(s)
 	checkErr(err)
 	smt.Exec()
+	_ = db.Close()
 }
 
 // 获取通知
@@ -125,6 +126,7 @@ func getNotification(UUID string, lastUpdate string) []notification {
 		rows.Scan(&data.Time, &data.PackageName, &data.Title, &data.Content)
 		datas = append(datas, data)
 	}
+	_ = db.Close()
 	return datas
 }
 
