@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -30,21 +29,21 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			log.Fatal("parse: ", err)
 		}
 		str := bytes.NewBuffer(result).String()
-		fmt.Println(str)
+		//fmt.Println(str)
 		var commStruct communicateStruct
 		err0 := json.Unmarshal([]byte(str), &commStruct)
 		if err0 != nil {
 			fmt.Println("notificationParser:strToNotification:\n json ERROR", err0)
 		}
 		//测试用打印
-		fmt.Println(commStruct)
+		//fmt.Println(commStruct)
 
 		if commStruct.Type == "Notifications" {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				n := strToNotification(string(decodeByte))
 
-				fmt.Println(n)
+				//fmt.Println(n)
 				//入数据库
 				if n != nil {
 					for _, item := range n {
@@ -58,7 +57,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				detail := strToPhoneDetail(string(decodeByte))
-				fmt.Println(detail)
+				//fmt.Println(detail)
 				setDetail(commStruct.UUID, detail)
 			} else {
 				fmt.Println("No communicateStruct received!")
@@ -67,7 +66,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				msg := strToMessages(string(decodeByte))
-				fmt.Println(msg)
+				//fmt.Println(msg)
 				setMessages(commStruct.UUID, msg)
 			} else {
 				fmt.Println("No communicateStruct received!")
@@ -77,7 +76,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			if len(commStruct.Data) != 0 {
 				decodeByte, _ := base64.StdEncoding.DecodeString(commStruct.Data)
 				msg := strToMessages(string(decodeByte))
-				fmt.Println(msg)
+				//fmt.Println(msg)
 				setAllMessage(commStruct.UUID, msg)
 			} else {
 				fmt.Println("No communicateStruct received!")
@@ -103,10 +102,10 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		for k, v := range request.Form {
-			fmt.Println("key", k)
-			fmt.Println("val: ", strings.Join(v, ""))
-		}
+		//for k, v := range request.Form {
+		//	fmt.Println("key", k)
+		//	fmt.Println("val: ", strings.Join(v, ""))
+		//}
 		uuid := request.Form.Get("UUID")
 		lastUpdate := request.Form.Get("Time")
 		cmdType := request.Form.Get("Type")
@@ -118,10 +117,12 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 			if cmdType == "Notifications" {
 				noti := getNotification(uuid, lastUpdate)
 				data := notificationsToStr(noti)
-				fmt.Println(data)
+				if(noti != nil) {
+					fmt.Println(data)
+				}
 				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 10),
 					"Notifications", data)
-				fmt.Println(comStructStr)
+				//fmt.Println(comStructStr)
 				_, err := fmt.Fprintf(writer, comStructStr)
 				if err != nil {
 					fmt.Println(err)
@@ -139,7 +140,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 10),
 					"Messages", data)
 				_, _ = fmt.Fprintf(writer, comStructStr)
-			}  else if cmdType == "AllMessages" {
+			} else if cmdType == "AllMessages" {
 				msm := getMessages(uuid)
 				data := messagesToStr(*msm)
 				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 10),
@@ -152,6 +153,7 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				if findClientByUUID(uuid, &c) {
 					if len(c.newSMS) != 0 {
 						data = messagesToStr(*getNewMessages(uuid))
+						t = "newSMS"
 						c.newSMS = nil
 					} else if c.needAll {
 						t = "all"
@@ -165,9 +167,9 @@ func parse(writer http.ResponseWriter, request *http.Request) {
 				} else {
 					t = "dead"
 				}
-				if data != "" {
-					data = base64.StdEncoding.EncodeToString([]byte(data))
-				}
+				//if data != "" {
+				//	data = base64.StdEncoding.EncodeToString([]byte(data))
+				//}
 				comStructStr := packageToCommStr(uuid, strconv.FormatInt(time.Now().Unix(), 10),
 					t, data)
 				_, _ = fmt.Fprintf(writer, comStructStr)
